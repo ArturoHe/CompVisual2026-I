@@ -1,1 +1,1 @@
-# CompVisual2026-I
+# Computacion Visual 2026-I
