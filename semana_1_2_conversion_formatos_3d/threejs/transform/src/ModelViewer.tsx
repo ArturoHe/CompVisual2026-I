@@ -16,9 +16,16 @@ interface ModelInfo {
 interface ModelProps {
   type: ModelType;
   setInfo: (info: ModelInfo) => void;
+  objectScale: number;
 }
 
-function GLTFModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
+function GLTFModel({
+  setInfo,
+  objectScale,
+}: {
+  setInfo: (info: ModelInfo) => void;
+  objectScale: number;
+}) {
   const gltf = useLoader(GLTFLoader, "/models/chair_obj.gltf");
 
   // Clonar la escena para evitar problemas al cambiar de modelo
@@ -81,10 +88,16 @@ function GLTFModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
     console.log("GLTF size:", size);
   }, [scene, setInfo]);
 
-  return <primitive object={scene} scale={0.01} />;
+  return <primitive object={scene} scale={0.01 * objectScale} />;
 }
 
-function STLModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
+function STLModel({
+  setInfo,
+  objectScale,
+}: {
+  setInfo: (info: ModelInfo) => void;
+  objectScale: number;
+}) {
   const geometry = useLoader(STLLoader, "/models/chair_gltf.stl");
 
   useEffect(() => {
@@ -122,8 +135,8 @@ function STLModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
 
   return (
     <>
-      {/* Modelo STL - sin escala porque ya está en unidades correctas */}
-      <mesh geometry={geometry} position={[0, 0, 0]}>
+      {/* Modelo STL */}
+      <mesh geometry={geometry} position={[0, 0, 0]} scale={objectScale}>
         <meshStandardMaterial
           color="orange"
           side={THREE.DoubleSide}
@@ -135,11 +148,19 @@ function STLModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
   );
 }
 
-function OBJModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
+function OBJModel({
+  setInfo,
+  objectScale,
+}: {
+  setInfo: (info: ModelInfo) => void;
+  objectScale: number;
+}) {
+  console.log("OBJModel renderizando, objectScale:", objectScale);
   const obj = useLoader(OBJLoader, "/models/chair_stl.obj");
 
   useEffect(() => {
     console.log("OBJ cargado exitosamente");
+    console.log("OBJ objectScale:", objectScale);
     let totalVertices = 0;
 
     obj.traverse((child) => {
@@ -159,22 +180,55 @@ function OBJModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
       setInfo({ vertices: totalVertices, format: "OBJ" });
       console.log("OBJ vértices:", totalVertices);
     }
-  }, [obj, setInfo]);
+
+    // Ver bounding box del OBJ
+    const box = new THREE.Box3().setFromObject(obj);
+    console.log("OBJ bounding box:", box);
+    console.log("OBJ min:", box.min);
+    console.log("OBJ max:", box.max);
+    const size = {
+      x: box.max.x - box.min.x,
+      y: box.max.y - box.min.y,
+      z: box.max.z - box.min.z,
+    };
+    console.log("OBJ size:", size);
+    const center = {
+      x: (box.max.x + box.min.x) / 2,
+      y: (box.max.y + box.min.y) / 2,
+      z: (box.max.z + box.min.z) / 2,
+    };
+    console.log("OBJ center:", center);
+  }, [obj, setInfo, objectScale]);
+
+  console.log("OBJ scale aplicado:", objectScale);
+
+  const finalScale = 0.01 * objectScale;
 
   return (
-    <primitive object={obj} scale={0.01} rotation={[-Math.PI / 2, 0, 0]} />
+    <group>
+      <primitive
+        object={obj}
+        scale={finalScale}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 0, 0]}
+      />
+    </group>
   );
 }
 
-function Model({ type, setInfo }: ModelProps) {
-  if (type === "gltf") return <GLTFModel setInfo={setInfo} />;
-  if (type === "stl") return <STLModel setInfo={setInfo} />;
-  if (type === "obj") return <OBJModel setInfo={setInfo} />;
+function Model({ type, setInfo, objectScale }: ModelProps) {
+  if (type === "gltf")
+    return <GLTFModel setInfo={setInfo} objectScale={objectScale} />;
+  if (type === "stl")
+    return <STLModel setInfo={setInfo} objectScale={objectScale} />;
+  if (type === "obj")
+    return <OBJModel setInfo={setInfo} objectScale={objectScale} />;
   return null;
 }
 
 export default function ModelViewer() {
   const [modelType, setModelType] = useState<ModelType>("stl");
+  const [objectScale, setObjectScale] = useState<number>(1);
   const [info, setInfo] = useState<ModelInfo>({
     vertices: 0,
     format: "",
@@ -264,6 +318,34 @@ export default function ModelViewer() {
           </button>
         </div>
 
+        {/* Control de Escala */}
+        <div style={{ marginTop: "15px" }}>
+          <label
+            htmlFor="objectScale"
+            style={{
+              display: "block",
+              marginBottom: "5px",
+              fontSize: "14px",
+              fontWeight: "bold",
+            }}
+          >
+            Escala: {objectScale.toFixed(2)}x
+          </label>
+          <input
+            id="objectScale"
+            type="range"
+            min="0.1"
+            max="3"
+            step="0.1"
+            value={objectScale}
+            onChange={(e) => setObjectScale(parseFloat(e.target.value))}
+            style={{
+              width: "100%",
+              cursor: "pointer",
+            }}
+          />
+        </div>
+
         <hr style={{ margin: "10px 0" }} />
 
         {loading && (
@@ -321,7 +403,12 @@ export default function ModelViewer() {
             </mesh>
           }
         >
-          <Model key={modelType} type={modelType} setInfo={handleSetInfo} />
+          <Model
+            key={modelType}
+            type={modelType}
+            setInfo={handleSetInfo}
+            objectScale={objectScale}
+          />
         </Suspense>
 
         {/* Controles */}
