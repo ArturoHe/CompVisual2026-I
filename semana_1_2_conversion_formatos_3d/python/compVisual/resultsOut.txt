@@ -1,0 +1,75 @@
+
+Cargando: modelos/chair_gltf.gltf
+
+Cargando: modelos/chair_obj.obj
+
+Cargando: modelos/chair_stl.stl
+
+Cargando: modelos\chair_gltf.gltf
+
+--- Análisis de chair_gltf.gltf ---
+Vértices: 26730
+Caras: 43392
+Normales: 26730
+Vértices duplicados: 5024
+¿Es watertight (cerrado)? False
+Área superficial: 1.5667466530663183
+Volumen: No aplica
+
+Cargando: modelos\chair_obj.obj
+
+--- Análisis de chair_obj.obj ---
+Vértices: 44734
+Caras: 86552
+Normales: 44734
+Vértices duplicados: 0
+¿Es watertight (cerrado)? False
+Área superficial: 1164188.993817733
+Volumen: No aplica
+
+Cargando: modelos\chair_stl.stl
+
+--- Análisis de chair_stl.stl ---
+Vértices: 7937
+Caras: 15840
+Normales: 7937
+Vértices duplicados: 0
+¿Es watertight (cerrado)? False
+Área superficial: 1324317.8811091688
+Volumen: No aplica
+
+========== COMPARACIÓN ==========
+
+Comparando chair_gltf.gltf vs chair_obj.obj
+Diferencia en vértices: -18004
+Diferencia en caras: -43160
+Diferencia en área: -1164187.4270710798
+
+========== COMPARACIÓN ==========
+
+Comparando chair_gltf.gltf vs chair_stl.stl
+Diferencia en vértices: 18793
+Diferencia en caras: 27552
+Diferencia en área: -1324316.3143625157
+
+========== COMPARACIÓN ==========
+
+Comparando chair_obj.obj vs chair_stl.stl
+Diferencia en vértices: 36797
+Diferencia en caras: 70712
+Diferencia en área: -160128.88729143585
+
+Cargando: modelos/chair_gltf.gltf
+Convertido y guardado en: output/chair_gltf.obj
+
+Cargando: modelos/chair_obj.obj
+Convertido y guardado en: output/chair_obj.gltf
+
+Cargando: modelos/chair_stl.stl
+Convertido y guardado en: output/chair_stl.obj
+
+Cargando: output/chair_gltf.obj
+
+Cargando: output/chair_obj.gltf
+
+Cargando: output/chair_stl.obj
