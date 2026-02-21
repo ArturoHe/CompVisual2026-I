@@ -8,7 +8,7 @@
 
 ## Descripción:
 
-"Comprender las estructuras gráficas básicas que forman los modelos 3D (mallas poligonales) y visualizar su estructura en distintas plataformas. Se explorará la diferencia entre vértice, arista y cara, así como el contenido de formatos de archivo estándar de malla como .OBJ, .STL y .GLTF."
+Con el desarrollo del taller se buscaba ampliar el entendimiento del estudiante sobre las estructuras básicas que componen los objetos 3d, para esto se desarrolló un modelo propio en blender, el cual fue exportado a unity para su visualización dentro del software, también se desarrollo un script con apoyo de la IA para hacer el conteo de las estructuras básicas.
 
 ## Implementaciones:
 
