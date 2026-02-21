@@ -1,11 +1,12 @@
-import React, { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import * as THREE from "three";
 
-type ModelType = "stl" | "obj";
+type ModelType = "gltf" | "stl" | "obj";
 
 interface ModelInfo {
   vertices: number;
@@ -15,6 +16,72 @@ interface ModelInfo {
 interface ModelProps {
   type: ModelType;
   setInfo: (info: ModelInfo) => void;
+}
+
+function GLTFModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
+  const gltf = useLoader(GLTFLoader, "/models/chair_obj.gltf");
+
+  // Clonar la escena para evitar problemas al cambiar de modelo
+  const scene = useMemo(() => {
+    const clonedScene = gltf.scene.clone(true);
+
+    // Configurar materiales en la escena clonada
+    clonedScene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        // Clonar geometría y material
+        if (child.geometry) {
+          child.geometry = child.geometry.clone();
+        }
+
+        // Asegurar que tenga material visible
+        if (
+          !child.material ||
+          (child.material as THREE.Material).opacity === 0
+        ) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: 0xff0000,
+            side: THREE.DoubleSide,
+          });
+        } else if (child.material) {
+          // Clonar el material existente
+          child.material = (child.material as THREE.Material).clone();
+        }
+      }
+    });
+
+    return clonedScene;
+  }, [gltf]);
+
+  useEffect(() => {
+    console.log("GLTF cargado exitosamente");
+
+    let totalVertices = 0;
+    scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const geometry = child.geometry;
+        if (geometry && geometry.attributes.position) {
+          totalVertices += geometry.attributes.position.count;
+        }
+      }
+    });
+
+    if (totalVertices > 0) {
+      setInfo({ vertices: totalVertices, format: "GLTF" });
+      console.log("GLTF vértices:", totalVertices);
+    }
+
+    // Ver el bounding box del modelo completo
+    const box = new THREE.Box3().setFromObject(scene);
+    console.log("GLTF bounding box:", box);
+    const size = {
+      x: box.max.x - box.min.x,
+      y: box.max.y - box.min.y,
+      z: box.max.z - box.min.z,
+    };
+    console.log("GLTF size:", size);
+  }, [scene, setInfo]);
+
+  return <primitive object={scene} scale={0.01} />;
 }
 
 function STLModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
@@ -100,6 +167,7 @@ function OBJModel({ setInfo }: { setInfo: (info: ModelInfo) => void }) {
 }
 
 function Model({ type, setInfo }: ModelProps) {
+  if (type === "gltf") return <GLTFModel setInfo={setInfo} />;
   if (type === "stl") return <STLModel setInfo={setInfo} />;
   if (type === "obj") return <OBJModel setInfo={setInfo} />;
   return null;
@@ -149,6 +217,21 @@ export default function ModelViewer() {
         </h3>
 
         <div style={{ display: "flex", gap: "8px", marginBottom: "15px" }}>
+          <button
+            onClick={() => handleModelChange("gltf")}
+            style={{
+              backgroundColor: modelType === "gltf" ? "#2196F3" : "#f0f0f0",
+              color: modelType === "gltf" ? "white" : "black",
+              border: "none",
+              padding: "10px 20px",
+              cursor: "pointer",
+              borderRadius: "5px",
+              fontWeight: "bold",
+              flex: 1,
+            }}
+          >
+            GLTF
+          </button>
           <button
             onClick={() => handleModelChange("stl")}
             style={{
