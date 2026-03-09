@@ -1,0 +1,15 @@
+@media only screen {
+	html,
+	body {
+		height: 100%;
+		width: 100%;
+		overflow: hidden;
+	}
+	body {
+		background-color: #fff;
+		font-family: Verdana, Geneva, Tahoma, sans-serif;
+	}
+	canvas {
+		max-height: 100%;
+	}
+}
